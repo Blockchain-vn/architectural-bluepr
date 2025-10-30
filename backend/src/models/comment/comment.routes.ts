@@ -177,7 +177,7 @@ router.delete('/comments/:id', authenticate, deleteComment);
  *     tags: [Comments]
  *     summary: Tạo bình luận mới
  *     description: Cho phép người dùng đăng nhập hoặc khách để lại bình luận
- *     security: []  // Không yêu cầu xác thực
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:
