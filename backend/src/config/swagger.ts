@@ -15,6 +15,10 @@ const options: swaggerJSDoc.Options = {
                 url: "http://localhost:5000",
                 description: "Local server",
             },
+            {
+                url: "https://architectural-bluepr-4.onrender.com",
+                description: "Staging server",
+            },
         ],
         components: {
             securitySchemes: {
@@ -28,31 +32,31 @@ const options: swaggerJSDoc.Options = {
                 User: {
                     type: 'object',
                     properties: {
-                        _id: { 
+                        _id: {
                             type: 'string',
                             description: 'ID của người dùng'
                         },
-                        username: { 
+                        username: {
                             type: 'string',
                             description: 'Tên đăng nhập'
                         },
-                        email: { 
+                        email: {
                             type: 'string',
                             format: 'email',
                             description: 'Email người dùng'
                         },
-                        role: { 
+                        role: {
                             type: 'string',
                             enum: ['user', 'admin'],
                             description: 'Vai trò người dùng',
                             default: 'user'
                         },
-                        createdAt: { 
+                        createdAt: {
                             type: 'string',
                             format: 'date-time',
                             description: 'Thời gian tạo tài khoản'
                         },
-                        updatedAt: { 
+                        updatedAt: {
                             type: 'string',
                             format: 'date-time',
                             description: 'Thời gian cập nhật cuối cùng'
@@ -63,12 +67,12 @@ const options: swaggerJSDoc.Options = {
                     type: 'object',
                     required: ['email', 'password'],
                     properties: {
-                        email: { 
+                        email: {
                             type: 'string',
                             format: 'email',
                             example: 'user@example.com'
                         },
-                        password: { 
+                        password: {
                             type: 'string',
                             format: 'password',
                             example: 'yourpassword123'
@@ -79,17 +83,17 @@ const options: swaggerJSDoc.Options = {
                     type: 'object',
                     required: ['username', 'email', 'password'],
                     properties: {
-                        username: { 
+                        username: {
                             type: 'string',
                             example: 'johndoe',
                             minLength: 3
                         },
-                        email: { 
+                        email: {
                             type: 'string',
                             format: 'email',
                             example: 'user@example.com'
                         },
-                        password: { 
+                        password: {
                             type: 'string',
                             format: 'password',
                             minLength: 6,
