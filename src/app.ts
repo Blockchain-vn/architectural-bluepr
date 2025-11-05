@@ -52,33 +52,4 @@ app.use('/api/file', fileRoutes);
 // Setup Swagger - Đặt sau tất cả các route khác
 setupSwagger(app);
 
-// CORS Configuration
-const corsOptions = {
-    origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
-    optionsSuccessStatus: 200
-};
-
-// Middleware
-app.use(cors(corsOptions));
-app.use(express.json());
-
-// Kết nối database
-connectDB();
-
-// Routes
-app.use("/api/content", contentRoutes);
-app.use('/api/auth', userRoutes);
-app.use('/api/search', searchRoutes);
-app.use('/api', commentRoutes);
-app.use('/api/payments', paymentRoutes);
-app.use('/api/reports', copyrightRoutes);
-app.use('/api/resources', resourceRoutes);
-app.use('/api/social', socialRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/categories', categoryRoutes);
-app.use('/api/file', fileRoutes);
-
 export default app;

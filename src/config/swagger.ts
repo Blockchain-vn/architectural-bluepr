@@ -12,12 +12,8 @@ const options: swaggerJSDoc.Options = {
         },
         servers: [
             {
-                url: "http://localhost:3000",
-                description: "Local server",
-            },
-            {
-                url: "https://architectural-bluepr-14.onrender.com",
-                description: "Staging server",
+                url: process.env.APP_URL || "http://localhost:3000",
+                description: process.env.NODE_ENV === "production" ? "Production server" : "Local server",
             },
         ],
         tags: [
