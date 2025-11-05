@@ -1,23 +1,42 @@
-# Sử dụng Node.js image phiên bản 18
+# Giai đoạn build
+FROM node:18-alpine AS builder
+
+# Tạo thư mục làm việc
+WORKDIR /usr/src/app
+
+# Sao chép file cấu hình
+COPY package*.json ./
+COPY tsconfig*.json ./
+
+# Cài đặt dependencies
+RUN npm ci
+
+# Sao chép toàn bộ mã nguồn
+COPY . .
+
+# Build ứng dụng
+RUN npm run build
+
+# Giai đoạn chạy
 FROM node:18-alpine
 
 # Tạo thư mục làm việc
 WORKDIR /usr/src/app
 
-# Sao chép package.json và package-lock.json
+# Sao chép file package
 COPY package*.json ./
 
-# Cài đặt các dependencies
-RUN npm install
+# Cài đặt cả dependencies và devDependencies
+RUN npm ci --only=production
 
-# Sao chép toàn bộ source code
-COPY . .
+# Sao chép file đã build từ giai đoạn builder
+COPY --from=builder /usr/src/app/dist ./dist
 
-# Build TypeScript code
-RUN npm run build
+# Sao chép file môi trường
+COPY .env* ./
 
-# Expose cổng mà ứng dụng sẽ chạy
+# Mở cổng
 EXPOSE 3000
 
-# Lệnh khởi động ứng dụng
-CMD ["npm", "start"]
+# Lệnh khởi động
+CMD ["node", "dist/server.js"]

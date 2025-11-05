@@ -1,0 +1,30 @@
+# Bỏ qua thư mục node_modules
+node_modules/
+
+# Bỏ qua file log
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Bỏ qua thư mục build/dist (sẽ được tạo lại khi build)
+dist/
+build/
+
+# Bỏ qua file môi trường (sẽ được copy riêng)
+.env
+.env.*
+
+# Bỏ qua file hệ thống
+.DS_Store
+Thumbs.db
+
+# Bỏ qua thư mục Git
+.git
+.gitignore
+
+# Bỏ qua thư mục IDE
+.vscode/
+.idea/
+
+# Bỏ qua file cấu hình local
+docker-compose.override.yml
