@@ -304,8 +304,7 @@ const options: swaggerJSDoc.Options = {
         }
     },
     apis: [
-        "./src/models/**/*.routes.ts",
-        "./src/routes/*.ts"
+        "../dist/models/**/*.routes.js"
     ],
 };
 
