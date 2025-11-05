@@ -30,3 +30,10 @@ build/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Server-only files
+.env
+docker-compose.yml
+github_cicd
+github_cicd.pub
+
