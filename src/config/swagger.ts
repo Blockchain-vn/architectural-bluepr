@@ -312,19 +312,28 @@ const options: swaggerJSDoc.Options = {
         : ["./src/models/**/*.ts"], // Tìm tất cả file .ts trong thư mục models
 };
 
-const swaggerSpec = swaggerJSDoc(options);
+// Định nghĩa interface cho swaggerSpec
+interface SwaggerSpec {
+    paths: Record<string, unknown>;
+    [key: string]: unknown;
+}
+
+const swaggerSpec = swaggerJSDoc(options) as SwaggerSpec;
 
 function setupSwagger(app: Express) {
     try {
-        console.log('🔄 Setting up Swagger...');
+        console.log('🔄 [1/3] Starting Swagger setup...');
         
         // Route cho file JSON
         app.get('/api-docs.json', (req, res) => {
-            console.log('📄 Sending Swagger JSON spec');
+            console.log('📄 [2/3] Sending Swagger JSON spec');
+            console.log('🔍 Total paths in spec:', Object.keys(swaggerSpec.paths || {}).length);
             res.setHeader('Content-Type', 'application/json');
             res.send(swaggerSpec);
         });
 
+        console.log('🛠️ [3/3] Preparing Swagger UI HTML');
+        
         // HTML template sử dụng CDN
         const swaggerHtml = `
         <!DOCTYPE html>
@@ -333,13 +342,50 @@ function setupSwagger(app: Express) {
             <title>API Documentation</title>
             <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui.css" />
             <style>
-                .swagger-ui .topbar { display: none; }
-                .swagger-ui .info { margin: 20px 0; }
-                .swagger-ui .scheme-container { margin: 0; padding: 10px 0; }
-                .swagger-ui .info .title { color: #3b4151; }
-                .swagger-ui .filter-container, .swagger-ui .opblock-tag { display: none !important; }
-                .swagger-ui .opblock-tag-section { display: block !important; }
-                .swagger-ui .opblock { margin: 10px 0; border: 1px solid #e0e0e0; border-radius: 4px; }
+                /* Hide elements */
+                .swagger-ui .topbar,
+                .swagger-ui .filter-container,
+                .swagger-ui .opblock-tag,
+                .swagger-ui .download-url-wrapper,
+                .swagger-ui .information-container.wrapper,
+                .swagger-ui .scheme-container {
+                    display: none !important;
+                }
+                
+                /* Improve layout */
+                .swagger-ui .info { 
+                    margin: 20px 0;
+                    padding: 20px;
+                    border: 1px solid #e0e0e0;
+                    border-radius: 4px;
+                    background: #f7f7f7;
+                }
+                
+                .swagger-ui .info .title {
+                    color: #3b4151;
+                    font-size: 24px;
+                    margin-bottom: 10px;
+                }
+                
+                .swagger-ui .opblock {
+                    margin: 15px 0;
+                    border: 1px solid #e0e0e0;
+                    border-radius: 4px;
+                    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+                }
+                
+                .swagger-ui .opblock .opblock-summary {
+                    padding: 8px 20px;
+                }
+                
+                .swagger-ui .opblock .opblock-summary-method {
+                    min-width: 80px;
+                    text-align: center;
+                }
+                
+                .swagger-ui .opblock .opblock-summary-path {
+                    font-size: 16px;
+                }
             </style>
         </head>
         <body>
@@ -348,7 +394,10 @@ function setupSwagger(app: Express) {
             <script src="https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui-standalone-preset.js"></script>
             <script>
                 window.onload = function() {
-                    window.ui = SwaggerUIBundle({
+                    console.log('🚀 Swagger UI is loading...');
+                    
+                    try {
+                        window.ui = SwaggerUIBundle({
                         url: '/api-docs.json',
                         dom_id: '#swagger-ui',
                         deepLinking: true,
@@ -361,8 +410,25 @@ function setupSwagger(app: Express) {
                         defaultModelsExpandDepth: -1,
                         defaultModelExpandDepth: 3,
                         displayRequestDuration: true,
-                        filter: false
+                        filter: false,
+                        // Debug options
+                        onComplete: function() {
+                            console.log('✅ Swagger UI rendered successfully');
+                            console.log('📊 Total operations loaded:', 
+                                document.querySelectorAll('.opblock').length);
+                        },
+                        onFailure: function(error) {
+                            console.error('❌ Swagger UI failed to load:', error);
+                        }
                     });
+                    } catch (error) {
+                        console.error('❌ Error initializing Swagger UI:', error);
+                        document.getElementById('swagger-ui').innerHTML = 
+                            '<div style="color: red; padding: 20px;">' +
+                            '<h3>Error loading Swagger UI</h3>' +
+                            '<pre>' + JSON.stringify(error, null, 2) + '</pre>' +
+                            '</div>';
+                    }
                 };
             </script>
         </body>
@@ -370,13 +436,34 @@ function setupSwagger(app: Express) {
 
         // Route cho Swagger UI
         app.get('/api-docs', (req, res) => {
+            console.log('🌐 Serving Swagger UI');
             res.send(swaggerHtml);
         });
 
-        console.log('✅ Swagger UI available at /api-docs');
-        console.log('📄 Swagger JSON available at /api-docs.json');
-    } catch (error) {
-        console.error('❌ Error setting up Swagger:', error);
+        console.log('✅ [SUCCESS] Swagger setup completed');
+        console.log('🔗 Swagger UI: /api-docs');
+        console.log('📄 API Spec: /api-docs.json');
+        console.log('🔄 Total paths defined:', Object.keys(swaggerSpec.paths || {}).length);
+    } catch (error: unknown) {
+        console.error('❌ [ERROR] Failed to setup Swagger');
+        
+        // Xử lý error một cách an toàn
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorStack = error instanceof Error ? error.stack : undefined;
+        
+        console.error('Error details:', errorMessage);
+        if (errorStack) {
+            console.error('Error stack:', errorStack);
+        }
+        
+        // Thêm route lỗi để debug
+        app.get('/api-docs/error', (req, res) => {
+            res.json({
+                error: 'Swagger setup failed',
+                message: errorMessage,
+                ...(process.env.NODE_ENV === 'development' && { stack: errorStack })
+            });
+        });
     }
 }
 
