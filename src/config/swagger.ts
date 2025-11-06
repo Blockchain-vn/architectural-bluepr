@@ -308,8 +308,8 @@ const options: swaggerJSDoc.Options = {
         }
     },
     apis: process.env.NODE_ENV === "production"
-        ? ["dist/models/**/*.routes.js"]
-        : ["./src/models/**/*.routes.ts"],
+        ? ["dist/models/**/*.js"] // Tìm tất cả file .js trong thư mục models
+        : ["./src/models/**/*.ts"], // Tìm tất cả file .ts trong thư mục models
 };
 
 const swaggerSpec = swaggerJSDoc(options);
