@@ -16,7 +16,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: "10000"
+        value: "3000"
       - key: MONGODB_URI
         value: "mongodb+srv://architectural-bluepr:kmQmfePjrMt1Sww9@cluster0.iw2snya.mongodb.net/test?retryWrites=true&w=majority"
       - key: JWT_SECRET
@@ -24,7 +24,7 @@ services:
       - key: JWT_REFRESH_SECRET
         generateValue: true
       - key: JWT_ACCESS_TOKEN_EXPIRES_IN
-        value: "900"
+        value: "3600"
       - key: JWT_REFRESH_TOKEN_EXPIRES_IN
         value: "604800"
       - key: EMAIL_USER
