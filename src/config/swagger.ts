@@ -315,77 +315,52 @@ const options: swaggerJSDoc.Options = {
 const swaggerSpec = swaggerJSDoc(options);
 
 function setupSwagger(app: Express) {
-    // Serve Swagger UI files from CDN
-    const swaggerUiHtml = `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>API Documentation</title>
-        <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui.css">
-        <style>
-            html { box-sizing: border-box; overflow-y: scroll; }
-            *, *:before, *:after { box-sizing: inherit; }
-            body { margin: 0; padding: 0; background: #fafafa; }
-            .swagger-ui .topbar { display: none; }
-            .swagger-ui .info { margin: 20px 0; }
-            .swagger-ui .scheme-container { margin: 0; padding: 10px 0; }
-        </style>
-    </head>
-    <body>
-        <div id="swagger-ui"></div>
-        <script src="https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui-bundle.js"></script>
-        <script src="https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui-standalone-preset.js"></script>
-        <script>
-            window.onload = function() {
-                // Begin Swagger UI call region
-                const ui = SwaggerUIBundle({
-                    url: '/api-docs.json',
-                    dom_id: '#swagger-ui',
-                    deepLinking: true,
-                    presets: [
-                        SwaggerUIBundle.presets.apis,
-                        SwaggerUIStandalonePreset
-                    ],
-                    plugins: [
-                        SwaggerUIBundle.plugins.DownloadUrl
-                    ],
-                    layout: "BaseLayout",
-                    requestInterceptor: function(request) {
-                        // Thêm các header cần thiết nếu có
-                        return request;
-                    },
-                    onComplete: function() {
-                        console.log('Swagger UI rendered successfully');
-                    }
-                });
-                // End Swagger UI call region
-                window.ui = ui;
-            };
-        </script>
-    </body>
-    </html>
-    `;
+    try {
+        // Log để kiểm tra xem hàm có được gọi không
+        console.log('🔄 Setting up Swagger...');
+        
+        // Middleware để log các request đến /api-docs
+        app.use('/api-docs', (req, res, next) => {
+            console.log(`📥 Request to ${req.path}`);
+            next();
+        });
 
-    // Enable CORS for Swagger UI
-    app.use('/api-docs', (req, res, next) => {
-        res.header('Access-Control-Allow-Origin', '*');
-        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-        next();
-    });
+        // Route cho file JSON
+        app.get('/api-docs.json', (req, res) => {
+            console.log('📄 Sending Swagger JSON spec');
+            res.setHeader('Content-Type', 'application/json');
+            res.send(swaggerSpec);
+        });
 
-    // Route cho Swagger UI
-    app.get('/api-docs', (req, res) => {
-        res.send(swaggerUiHtml);
-    });
+        // Sử dụng swagger-ui-express đơn giản
+        const swaggerUiOptions = {
+            explorer: true,
+            customSiteTitle: 'API Documentation',
+            swaggerOptions: {
+                url: '/api-docs.json',
+                docExpansion: 'list',
+                filter: true,
+                showRequestDuration: true,
+            },
+            customCss: `
+                .swagger-ui .topbar { display: none }
+                .swagger-ui .info { margin: 20px 0; }
+                .swagger-ui .scheme-container { margin: 0; padding: 10px 0; }
+            `,
+        };
 
-    // JSON endpoint
-    app.get('/api-docs.json', (req, res) => {
-        res.setHeader('Content-Type', 'application/json');
-        res.send(swaggerSpec);
-    });
+        // Sử dụng swagger-ui-express
+        app.use(
+            '/api-docs',
+            swaggerUi.serve,
+            swaggerUi.setup(null, swaggerUiOptions)
+        );
 
-    console.log('📚 API Documentation available at /api-docs');
+        console.log('✅ Swagger UI available at /api-docs');
+        console.log('📄 Swagger JSON available at /api-docs.json');
+    } catch (error) {
+        console.error('❌ Error setting up Swagger:', error);
+    }
 }
 
 export { setupSwagger };
