@@ -9,9 +9,9 @@ const options: swaggerJSDoc.Options = {
     definition: {
         openapi: "3.0.0",
         info: {
-            title: "Multi Content API",
+            title: "Architectural Blueprint API",
             version: "1.0.0",
-            description: "API tài liệu cho hệ thống chia sẻ đa nội dung",
+            description: "Hệ thống quản lý và chia sẻ bản vẽ kiến trúc",
         },
         servers: [
             {
@@ -378,7 +378,7 @@ function setupSwagger(app: Express) {
         <!DOCTYPE html>
         <html>
         <head>
-            <title>API Documentation</title>
+            <title>Architectural Blueprint API</title>
             <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui.css" />
             <style>
                 /* Hide elements */
