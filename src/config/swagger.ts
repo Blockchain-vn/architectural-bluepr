@@ -1,7 +1,10 @@
 import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 import { Express } from "express";
+import path from "path";
+import fs from "fs";
 
+// Cấu hình Swagger
 const options: swaggerJSDoc.Options = {
     definition: {
         openapi: "3.0.0",
@@ -307,9 +310,12 @@ const options: swaggerJSDoc.Options = {
             }
         }
     },
-    apis: process.env.NODE_ENV === "production"
-        ? ["dist/models/**/*.js"] // Tìm tất cả file .js trong thư mục models
-        : ["./src/models/**/*.ts"], // Tìm tất cả file .ts trong thư mục models
+    apis: [
+        // Tìm trong tất cả các thư mục có thể chứa routes
+        "./src/**/*.ts",
+        "./src/**/*.js",
+        "./dist/**/*.js"
+    ],
 };
 
 // Định nghĩa interface cho swaggerSpec
@@ -321,8 +327,41 @@ interface SwaggerSpec {
 const swaggerSpec = swaggerJSDoc(options) as SwaggerSpec;
 
 function setupSwagger(app: Express) {
+    // Log thông tin debug
+    console.log('🔍 Current working directory:', process.cwd());
+    console.log('🔍 NODE_ENV:', process.env.NODE_ENV);
+    
+    // Log all files that will be scanned for API docs
+    const scanDirs = [
+        path.join(process.cwd(), 'src'),
+        path.join(process.cwd(), 'dist')
+    ];
+
+    console.log('🔍 Scanning directories for API docs:');
+    scanDirs.forEach(dir => {
+        if (fs.existsSync(dir)) {
+            console.log(`   - ${dir}`);
+        } else {
+            console.warn(`   ⚠️ Directory not found: ${dir}`);
+        }
+    });
+    
+    // Log swagger spec info
+    console.log('🔍 API Paths found:', Object.keys(swaggerSpec.paths || {}).length);
+    if (Object.keys(swaggerSpec.paths || {}).length === 0) {
+        console.warn('⚠️  No API paths found in swaggerSpec!');
+        console.log('🔍 Swagger options:', JSON.stringify(options, null, 2));
+    }
     try {
         console.log('🔄 [1/3] Starting Swagger setup...');
+        
+        // Log all found paths for debugging
+        if (Object.keys(swaggerSpec.paths || {}).length > 0) {
+            console.log('✅ Found API paths:');
+            Object.keys(swaggerSpec.paths).forEach(path => {
+                console.log(`   - ${path}`);
+            });
+        }
         
         // Route cho file JSON
         app.get('/api-docs.json', (req, res) => {
@@ -437,6 +476,7 @@ function setupSwagger(app: Express) {
         // Route cho Swagger UI
         app.get('/api-docs', (req, res) => {
             console.log('🌐 Serving Swagger UI');
+            console.log('🔍 Total API paths:', Object.keys(swaggerSpec.paths || {}).length);
             res.send(swaggerHtml);
         });
 
@@ -444,7 +484,7 @@ function setupSwagger(app: Express) {
         console.log('🔗 Swagger UI: /api-docs');
         console.log('📄 API Spec: /api-docs.json');
         console.log('🔄 Total paths defined:', Object.keys(swaggerSpec.paths || {}).length);
-    } catch (error: unknown) {
+    } catch (error) {
         console.error('❌ [ERROR] Failed to setup Swagger');
         
         // Xử lý error một cách an toàn
