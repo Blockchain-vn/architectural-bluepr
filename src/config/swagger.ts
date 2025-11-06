@@ -325,43 +325,45 @@ function setupSwagger(app: Express) {
             res.send(swaggerSpec);
         });
 
-        // Cấu hình Swagger UI
-        const swaggerUiOptions = {
-            explorer: true,
-            swaggerOptions: {
-                url: '/api-docs.json',
-                docExpansion: 'list',
-                filter: true,
-                showRequestDuration: true,
-                persistAuthorization: true,
-                layout: 'StandaloneLayout',
-                // Sử dụng các file từ CDN thay vì từ node_modules
-                customJs: [
-                    'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.min.js',
-                    'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.min.js'
-                ],
-                customCssUrl: [
-                    'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css',
-                    'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.min.css',
-                    'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.css'
-                ]
-            },
-            customCss: `
-                .swagger-ui .topbar { display: none }
+        // HTML template sử dụng CDN
+        const swaggerHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>API Documentation</title>
+            <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui.css" />
+            <style>
+                .swagger-ui .topbar { display: none; }
                 .swagger-ui .info { margin: 20px 0; }
                 .swagger-ui .scheme-container { margin: 0; padding: 10px 0; }
                 .swagger-ui .info .title { color: #3b4151; }
-            `,
-            customSiteTitle: 'API Documentation',
-            customfavIcon: '/favicon.ico'
-        };
+            </style>
+        </head>
+        <body>
+            <div id="swagger-ui"></div>
+            <script src="https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui-bundle.js"></script>
+            <script src="https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui-standalone-preset.js"></script>
+            <script>
+                window.onload = function() {
+                    window.ui = SwaggerUIBundle({
+                        url: '/api-docs.json',
+                        dom_id: '#swagger-ui',
+                        deepLinking: true,
+                        presets: [
+                            SwaggerUIBundle.presets.apis,
+                            SwaggerUIStandalonePreset
+                        ],
+                        layout: "StandaloneLayout"
+                    });
+                };
+            </script>
+        </body>
+        </html>`;
 
-        // Sử dụng swagger-ui-express với cấu hình tối ưu
-        app.use(
-            '/api-docs',
-            swaggerUi.serveFiles(swaggerSpec, swaggerUiOptions),
-            swaggerUi.setup(swaggerSpec, swaggerUiOptions)
-        );
+        // Route cho Swagger UI
+        app.get('/api-docs', (req, res) => {
+            res.send(swaggerHtml);
+        });
 
         console.log('✅ Swagger UI available at /api-docs');
         console.log('📄 Swagger JSON available at /api-docs.json');
