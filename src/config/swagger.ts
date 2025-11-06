@@ -316,15 +316,8 @@ const swaggerSpec = swaggerJSDoc(options);
 
 function setupSwagger(app: Express) {
     try {
-        // Log để kiểm tra xem hàm có được gọi không
         console.log('🔄 Setting up Swagger...');
         
-        // Middleware để log các request đến /api-docs
-        app.use('/api-docs', (req, res, next) => {
-            console.log(`📥 Request to ${req.path}`);
-            next();
-        });
-
         // Route cho file JSON
         app.get('/api-docs.json', (req, res) => {
             console.log('📄 Sending Swagger JSON spec');
@@ -332,28 +325,42 @@ function setupSwagger(app: Express) {
             res.send(swaggerSpec);
         });
 
-        // Sử dụng swagger-ui-express đơn giản
+        // Cấu hình Swagger UI
         const swaggerUiOptions = {
             explorer: true,
-            customSiteTitle: 'API Documentation',
             swaggerOptions: {
                 url: '/api-docs.json',
                 docExpansion: 'list',
                 filter: true,
                 showRequestDuration: true,
+                persistAuthorization: true,
+                layout: 'StandaloneLayout',
+                // Sử dụng các file từ CDN thay vì từ node_modules
+                customJs: [
+                    'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.min.js',
+                    'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.min.js'
+                ],
+                customCssUrl: [
+                    'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css',
+                    'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.min.css',
+                    'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.css'
+                ]
             },
             customCss: `
                 .swagger-ui .topbar { display: none }
                 .swagger-ui .info { margin: 20px 0; }
                 .swagger-ui .scheme-container { margin: 0; padding: 10px 0; }
+                .swagger-ui .info .title { color: #3b4151; }
             `,
+            customSiteTitle: 'API Documentation',
+            customfavIcon: '/favicon.ico'
         };
 
-        // Sử dụng swagger-ui-express
+        // Sử dụng swagger-ui-express với cấu hình tối ưu
         app.use(
             '/api-docs',
-            swaggerUi.serve,
-            swaggerUi.setup(null, swaggerUiOptions)
+            swaggerUi.serveFiles(swaggerSpec, swaggerUiOptions),
+            swaggerUi.setup(swaggerSpec, swaggerUiOptions)
         );
 
         console.log('✅ Swagger UI available at /api-docs');
