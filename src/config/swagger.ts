@@ -315,17 +315,21 @@ const options: swaggerJSDoc.Options = {
 const swaggerSpec = swaggerJSDoc(options);
 
 function setupSwagger(app: Express) {
-    // Route cho Swagger UI
+    // Serve Swagger UI files from CDN
     const swaggerUiHtml = `
     <!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
         <title>API Documentation</title>
-        <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui.css">
+        <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui.css">
         <style>
-            .swagger-ui .topbar { display: none }
-            body { margin: 0; padding: 0; }
+            html { box-sizing: border-box; overflow-y: scroll; }
+            *, *:before, *:after { box-sizing: inherit; }
+            body { margin: 0; padding: 0; background: #fafafa; }
+            .swagger-ui .topbar { display: none; }
+            .swagger-ui .info { margin: 20px 0; }
+            .swagger-ui .scheme-container { margin: 0; padding: 10px 0; }
         </style>
     </head>
     <body>
@@ -334,7 +338,8 @@ function setupSwagger(app: Express) {
         <script src="https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui-standalone-preset.js"></script>
         <script>
             window.onload = function() {
-                window.ui = SwaggerUIBundle({
+                // Begin Swagger UI call region
+                const ui = SwaggerUIBundle({
                     url: '/api-docs.json',
                     dom_id: '#swagger-ui',
                     deepLinking: true,
@@ -345,30 +350,33 @@ function setupSwagger(app: Express) {
                     plugins: [
                         SwaggerUIBundle.plugins.DownloadUrl
                     ],
-                    layout: "StandaloneLayout"
+                    layout: "BaseLayout",
+                    requestInterceptor: function(request) {
+                        // Thêm các header cần thiết nếu có
+                        return request;
+                    },
+                    onComplete: function() {
+                        console.log('Swagger UI rendered successfully');
+                    }
                 });
+                // End Swagger UI call region
+                window.ui = ui;
             };
         </script>
     </body>
     </html>
     `;
 
+    // Enable CORS for Swagger UI
+    app.use('/api-docs', (req, res, next) => {
+        res.header('Access-Control-Allow-Origin', '*');
+        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+        next();
+    });
+
     // Route cho Swagger UI
     app.get('/api-docs', (req, res) => {
         res.send(swaggerUiHtml);
-    });
-
-    // Route cho file tĩnh
-    app.get('/api-docs/swagger-ui.css', (req, res) => {
-        res.redirect('https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui.css');
-    });
-
-    app.get('/api-docs/swagger-ui-bundle.js', (req, res) => {
-        res.redirect('https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui-bundle.js');
-    });
-
-    app.get('/api-docs/swagger-ui-standalone-preset.js', (req, res) => {
-        res.redirect('https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui-standalone-preset.js');
     });
 
     // JSON endpoint
