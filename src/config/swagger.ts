@@ -379,7 +379,10 @@ function setupSwagger(app: Express) {
         <html>
         <head>
             <title>Architectural Blueprint API</title>
-            <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui.css" />
+            <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+            <meta http-equiv="Pragma" content="no-cache" />
+            <meta http-equiv="Expires" content="0" />
+            <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui.css?v=" + new Date().getTime() />
             <style>
                 /* Hide elements */
                 .swagger-ui .topbar,
@@ -429,32 +432,54 @@ function setupSwagger(app: Express) {
         </head>
         <body>
             <div id="swagger-ui"></div>
-            <script src="https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui-bundle.js"></script>
-            <script src="https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui-standalone-preset.js"></script>
+            <script src="https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui-bundle.js?v=" + new Date().getTime()></script>
+            <script src="https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui-standalone-preset.js?v=" + new Date().getTime()></script>
             <script>
                 window.onload = function() {
                     console.log('🚀 Swagger UI is loading...');
                     
                     try {
+                        // Set the document title immediately
+                        document.title = 'Architectural Blueprint API';
+                        
                         window.ui = SwaggerUIBundle({
-                        url: '/api-docs.json',
-                        dom_id: '#swagger-ui',
-                        deepLinking: true,
-                        presets: [
-                            SwaggerUIBundle.presets.apis,
-                            SwaggerUIStandalonePreset
-                        ],
-                        layout: "StandaloneLayout",
-                        docExpansion: 'list',
-                        defaultModelsExpandDepth: -1,
-                        defaultModelExpandDepth: 3,
-                        displayRequestDuration: true,
-                        filter: false,
+                            url: '/api-docs.json',
+                            dom_id: '#swagger-ui',
+                            deepLinking: true,
+                            docExpansion: 'list',
+                            filter: false,
+                            displayRequestDuration: true,
+                            showExtensions: true,
+                            showCommonExtensions: true,
+                            defaultModelsExpandDepth: 1,
+                            defaultModelExpandDepth: 1,
+                            defaultModelRendering: 'model',
+                            displayOperationId: false,
+                            presets: [
+                                SwaggerUIBundle.presets.apis,
+                                SwaggerUIStandalonePreset
+                            ],
+                            layout: "StandaloneLayout",
                         // Debug options
                         onComplete: function() {
                             console.log('✅ Swagger UI rendered successfully');
                             console.log('📊 Total operations loaded:', 
                                 document.querySelectorAll('.opblock').length);
+                                
+                            // Update the title in the UI
+                            const titleEl = document.querySelector('.info .title');
+                            if (titleEl) {
+                                titleEl.textContent = 'Architectural Blueprint API';
+                                titleEl.style.color = '#3b4151';
+                                titleEl.style.fontSize = '36px';
+                                titleEl.style.marginBottom = '20px';
+                            }
+                            
+                            // Update the description
+                            const descEl = document.querySelector('.info .description');
+                            if (descEl) {
+                                descEl.textContent = 'Hệ thống quản lý và chia sẻ bản vẽ kiến trúc';
+                            }
                         },
                         onFailure: function(error) {
                             console.error('❌ Swagger UI failed to load:', error);
