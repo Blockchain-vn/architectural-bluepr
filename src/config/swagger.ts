@@ -337,6 +337,9 @@ function setupSwagger(app: Express) {
                 .swagger-ui .info { margin: 20px 0; }
                 .swagger-ui .scheme-container { margin: 0; padding: 10px 0; }
                 .swagger-ui .info .title { color: #3b4151; }
+                .swagger-ui .filter-container, .swagger-ui .opblock-tag { display: none !important; }
+                .swagger-ui .opblock-tag-section { display: block !important; }
+                .swagger-ui .opblock { margin: 10px 0; border: 1px solid #e0e0e0; border-radius: 4px; }
             </style>
         </head>
         <body>
@@ -353,7 +356,12 @@ function setupSwagger(app: Express) {
                             SwaggerUIBundle.presets.apis,
                             SwaggerUIStandalonePreset
                         ],
-                        layout: "StandaloneLayout"
+                        layout: "StandaloneLayout",
+                        docExpansion: 'list',
+                        defaultModelsExpandDepth: -1,
+                        defaultModelExpandDepth: 3,
+                        displayRequestDuration: true,
+                        filter: false
                     });
                 };
             </script>
